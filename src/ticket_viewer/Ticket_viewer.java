@@ -45,10 +45,52 @@ public class Ticket_viewer {
 	        conn.setRequestProperty("Authorization", "Basic "+encoded);
 			conn.setRequestMethod("GET");
 			conn.setRequestProperty("Accept", "application/json");
-			
-			JsonReader reader = new JsonReader(new InputStreamReader(conn.getInputStream(), "UTF-8"));
-			view.createTickets(reader);
-	 		
+			int code = conn.getResponseCode();
+			/*
+			 * The handling of API not available is done here
+			 */
+			if(code == HttpURLConnection.HTTP_OK)
+			{
+				JsonReader reader = new JsonReader(new InputStreamReader(conn.getInputStream(), "UTF-8"));
+				view.createTickets(reader);
+				String ch = "";
+				while(! ch.toUpperCase().equals("Q")  )
+				{
+					ch = showMenu();
+					switch (ch)
+					{
+					case "1":
+						showAll(view);
+						break;
+					case "2":
+						showOne(view);
+						break;
+					case "q":
+						break;
+					default:
+						System.out.println("Please enter the corrent input.");
+					
+					}
+				}
+				System.out.println("          "+"Thank you for using Ticket Viewer Goodbye "+":-)");
+		 		
+			}
+			else
+			{
+				if(code == HttpURLConnection.HTTP_NOT_FOUND)
+				{
+					System.out.println("The resource can not be found may get available in future");
+				}
+				if(code == HttpURLConnection.HTTP_UNAVAILABLE)
+				{
+					System.out.println("The server is down for a short period of time, please try later ");
+				}
+				if(code == HttpURLConnection.HTTP_UNAUTHORIZED)
+				{
+					System.out.println("Need Authorisation to access this resource");
+				}
+			}
+		
 		}
 		catch(FileNotFoundException ex)
 		{
@@ -64,6 +106,7 @@ public class Ticket_viewer {
 			System.out.println(ex.getMessage());
 			ex.printStackTrace();
 		}
+		
 		catch(Exception ex)
 		{
 			System.out.println(ex.getMessage());
@@ -74,26 +117,7 @@ public class Ticket_viewer {
 			conn.disconnect();
 			
 		}
-		String ch = "";
-		while(! ch.toUpperCase().equals("Q")  )
-		{
-			ch = showMenu();
-			switch (ch)
-			{
-			case "1":
-				showAll(view);
-				break;
-			case "2":
-				showOne(view);
-				break;
-			case "q":
-				break;
-			default:
-				System.out.println("Please enter the corrent input.");
-			
-			}
-		}
-		System.out.println("          "+"Thank you for using Ticket Viewer Goodbye "+":-)");
+		
 	}
 	/*
 	 * Individual Tickets are shown by getting the required ticket id as an input from the user.Than searching it in 
@@ -143,7 +167,10 @@ public class Ticket_viewer {
 			count ++;
 		}
 	}
-
+	/*
+	 * The first thing showed to user is the menu
+	 * from where users selects an option
+	 */
 	private static String showMenu() {
 		// TODO Auto-generated method stub
 		Scanner getOption = new Scanner(System.in);
